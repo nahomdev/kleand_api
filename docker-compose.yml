@@ -1,0 +1,42 @@
+version: "3.6"
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    networks:
+      - core_network
+    ports:
+      - '5432:5432' 
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes: 
+      - dbdata:/var/lib/postgresql/data
+  kleand_express:
+    container_name: kleand_api
+    networks:
+      - core_network
+    ports:
+      - '${EXPRESS_PORT}:${EXPRESS_PORT}'
+    volumes:
+      - .:/usr/src/app
+      - ./uploads:/usr/src/app/uploads
+      - ./express:/usr/src/app/express
+    build:
+      dockerfile: express.dockerfile
+      context: .
+      args:
+        - EXPRESS_PORT=${EXPRESS_PORT}
+    restart: always
+    environment:
+      - EXPRESS_PORT=${EXPRESS_PORT} 
+      - NODE_ENV=${NODE_ENV:-development}
+      - ENCRYPTION_KEY=${KEY} 
+      - PG_DATABASE_URL=${DATABASE_URL}
+volumes:
+  dbdata:
+networks:
+  core_network:
+       
+  
+  
